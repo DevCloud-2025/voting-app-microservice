@@ -46,6 +46,7 @@ func main() {
 
 	//REDIS_ADDR := os.Getenv("REDIS_ADDR")
 	REDIS_ADDR := "redis:6379"
+	//REDIS_ADDR := "localhost:6379"
 
 	// Initialize Redis client
 	redisClient = redis.NewClient(&redis.Options{
