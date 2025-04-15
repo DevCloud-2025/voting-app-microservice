@@ -8,7 +8,8 @@ metadata:
 spec:
   containers:
     - name: postgres
-      image: postgres:latest
+      #image: postgres:1.0
+      image: lukmanadeokun31/postgres:1.0
       ports:
         - containerPort: 5432
       env:
