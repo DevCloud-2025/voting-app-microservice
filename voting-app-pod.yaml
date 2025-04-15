@@ -13,8 +13,8 @@ spec:
         - containerPort: 8083
       env:
         - name: RESULTS_SERVICE_URL
-          #value: "http://localhost:30005/results"
-          value: "http://results-service:8085/results"
+          value: "http://localhost:30005/results"
+          #value: "http://results-service:8085/results"
         - name: REDIS_ADDR
           value: "redis:6379"
         
