@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
     - name: worker-app-pod
-      image: lukmanadeokun31/worker-service:latest
+      image: lukmanadeokun31/worker-service:1.0
       ports:
         - containerPort: 8084
       env:
