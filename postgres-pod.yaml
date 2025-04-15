@@ -9,7 +9,7 @@ spec:
   containers:
     - name: postgres
       #image: postgres:1.0
-      image: lukmanadeokun31/postgres:1.0
+      image: lukmanadeokun31/postgres:latest
       ports:
         - containerPort: 5432
       env:
