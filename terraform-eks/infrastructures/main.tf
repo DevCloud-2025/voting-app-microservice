@@ -23,7 +23,3 @@ module "eks-cluster" {
 }
 
 
-# module "eks-iam-role" {
-#   source = "../modules/iam-role"
-
-# }

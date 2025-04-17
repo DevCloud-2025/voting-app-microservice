@@ -4,6 +4,13 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
   subnet_ids      = var.subnet_ids
+  create_iam_role = true
+  iam_role_name   = "${var.cluster_name}-eks-cluster"
+
+  iam_role_additional_policies = {
+    additional = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  }
+
 
   enable_irsa = true
 
@@ -12,6 +19,7 @@ module "eks" {
   }
 
   vpc_id = var.vpc_id
+
 
   eks_managed_node_group_defaults = {
     ami_type               = "AL2_x86_64"
@@ -28,4 +36,6 @@ module "eks" {
     }
   }
 }
+
+
 
