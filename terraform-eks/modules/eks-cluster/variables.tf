@@ -21,3 +21,9 @@ variable "vpc_id" {
 variable "worker_sg_id" {
   type = string
 }
+
+
+variable "cluster_endpoint_public_access" {
+  type = list(string)
+  default = [ "0.0.0.0/0" ]
+}
