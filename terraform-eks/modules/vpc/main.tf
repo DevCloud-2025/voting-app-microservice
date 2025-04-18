@@ -3,6 +3,7 @@
 
 data "aws_availability_zones" "available" {}
 
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.7.0"
@@ -31,3 +32,4 @@ module "vpc" {
     "kubernetes.io/role/internal-elb"           = "1"
   }
 }
+

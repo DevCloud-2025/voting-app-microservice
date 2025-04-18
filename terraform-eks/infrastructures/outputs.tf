@@ -28,3 +28,7 @@ output "vpc_id" {
   description = "value of the VPC ID"
 }
 
+output "cluster_name" {
+  description = "The name of the EKS cluster"
+  value       = module.eks-cluster.cluster_name
+}

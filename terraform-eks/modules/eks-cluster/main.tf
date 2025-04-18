@@ -41,6 +41,7 @@
 
 
 
+data "aws_caller_identity" "current" {}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -56,9 +57,26 @@ module "eks" {
   enable_irsa                              = true
   cluster_endpoint_public_access         = true
   cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access
+  
 
   iam_role_additional_policies = {
     additional = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  }
+  access_entries = {
+    # One access entry with a policy associated
+    example = {
+      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+
+      policy_associations = {
+        example = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            namespaces = ["default"]
+            type       = "namespace"
+          }
+        }
+      }
+    }
   }
 
   tags = {

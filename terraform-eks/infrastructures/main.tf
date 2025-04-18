@@ -1,7 +1,7 @@
 module "security-group" {
   source = "../modules/security-group"
   vpc_id = module.vpc.vpc_id
-
+  eks_cluster_sg_id = module.eks-cluster.cluster_security_group_id
 }
 
 module "vpc" {
