@@ -1,0 +1,26 @@
+---
+- name: Check if Helm is already installed
+  command: helm version --short
+  register: helm_installed
+  ignore_errors: yes
+
+- name: Download Helm
+  when: helm_installed.rc != 0
+  get_url:
+    url: https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
+    dest: /tmp/helm.tar.gz
+
+- name: Extract Helm
+  when: helm_installed.rc != 0
+  unarchive:
+    src: /tmp/helm.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Move helm binary to /usr/local/bin
+  when: helm_installed.rc != 0
+  become: yes
+  copy:
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    mode: '0755'

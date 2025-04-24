@@ -1,0 +1,11 @@
+grafana:
+  enabled: true
+  adminPassword: "admin"
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+alertmanager:
+  alertmanagerSpec:
+    replicas: 1
