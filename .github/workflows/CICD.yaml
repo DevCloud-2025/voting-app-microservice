@@ -20,7 +20,8 @@ jobs:
   code-quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -33,21 +34,29 @@ jobs:
           go install github.com/mgechev/revive@latest
           go install honnef.co/go/tools/cmd/staticcheck@latest
 
-      - name: Run golint
-        run: golint .
+      - name: Check if Go modules are initialized
+        run: |
+          if [ ! -f "go.mod" ]; then
+            echo "No go.mod file found! Please ensure you are in the right directory."
+            exit 1
+          fi
 
-      - name: Run revive
-        run: revive .
+      - name: Run golint on all files
+        run: |
+          find . -name '*.go' -type f -print0 | xargs -0 golint
 
-      - name: Run staticcheck
-        run: staticcheck .
+      - name: Run revive on all files
+        run: |
+          find . -name '*.go' -type f -print0 | xargs -0 revive
 
-      - name: Run go vet
-        run: go vet .
+      - name: Run staticcheck on all packages
+        run: staticcheck ./...
+
+      - name: Run go vet on all packages
+        run: go vet ./...
 
       - name: Run unit tests
-        run: go test -v .
-
+        run: go test -v ./...
 
   security-scan:
     needs: code-quality
