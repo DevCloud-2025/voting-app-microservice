@@ -39,7 +39,7 @@ jobs:
   #     run: go test ./... -v
 
   security-scan:
-    needs: code-quality
+    # needs: code-quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
