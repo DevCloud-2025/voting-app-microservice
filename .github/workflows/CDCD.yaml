@@ -1,0 +1,176 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAMESPACE: yourdockerhubusername   # or your ECR namespace
+  TF_WORKING_DIR: ./infra/terraform
+  KUBE_MANIFEST_DIR: ./k8s-manifests
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install tools
+        run: |
+          go install golang.org/x/lint/golint@latest
+          go install github.com/mgechev/revive@latest
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Run golint
+        run: golint ./...
+
+      - name: Run revive
+        run: revive ./...
+
+      - name: Run staticcheck
+        run: staticcheck ./...
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run unit tests
+        run: go test -v ./...
+
+
+  security-scan:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Trivy
+        uses: aquasecurity/trivy-action@v0.16.1
+        with:
+          scan-type: fs
+          severity: CRITICAL,HIGH
+
+#   build-and-push:
+#     needs: security-scan
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         service:
+#           - voting-service
+#           - result-service
+#           - worker-service
+
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Login to DockerHub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ secrets.DOCKER_USERNAME }}
+#           password: ${{ secrets.DOCKER_PASSWORD }}
+
+#       - name: Check if service changed
+#         id: changes
+#         uses: dorny/paths-filter@v3
+#         with:
+#           filters: |
+#             service:
+#               - '${{ matrix.service }}/**'
+
+#       - name: Build and push Docker image
+#         if: steps.changes.outputs.service == 'true'
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: ./${{ matrix.service }}
+#           file: ./${{ matrix.service }}/Dockerfile
+#           push: true
+#           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ matrix.service }}:latest
+
+# aws-auth:
+#   runs-on: ubuntu-latest
+#   steps:
+#     - name: Configure AWS Credentials for China region audience
+#       uses: aws-actions/configure-aws-credentials@v4.1.0
+#       with:
+#         audience: sts.amazonaws.com.cn
+#         aws-region: us-west-1
+#         role-to-assume: arn:aws:iam::057260092328:role/cicd_role
+
+# # gcp-auth:
+# #   runs-on: ubuntu-latest
+# #   steps:
+# #     - name: Authenticate to Google Cloud (OIDC)
+# #       uses: google-github-actions/auth@v2
+# #       with:
+# #         workload_identity_provider: projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/<POOL_ID>/providers/<PROVIDER_ID>
+# #         service_account: <SERVICE_ACCOUNT_EMAIL>
+
+  
+#   terraform-apply:
+#     needs: build-and-push
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v3
+
+#       - name: Terraform Init
+#         working-directory: ${{ env.TF_WORKING_DIR }}
+#         run: terraform init
+
+#       - name: Terraform Apply
+#         working-directory: ${{ env.TF_WORKING_DIR }}
+#         run: terraform apply -auto-approve
+
+#   deploy-to-kubernetes:
+#     needs: terraform-apply
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Set up kubectl
+#         uses: azure/setup-kubectl@v3
+#         with:
+#           version: v1.29.0
+
+#       - name: Deploy Manifests
+#         run: kubectl apply -f ${{ env.KUBE_MANIFEST_DIR }}
+
+#   post-deployment-tests:
+#     needs: deploy-to-kubernetes
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Run Smoke/API Tests
+#         run: |
+#           curl --fail http://your-service-url/health || exit 1
+#           curl --fail http://your-service-url/api/v1/ping || exit 1
+
+#   notify:
+#   needs: [post-deployment-tests]
+#   runs-on: ubuntu-latest
+#   if: always()
+#   steps:
+#     - name: Notify via Slack
+#       uses: slackapi/slack-github-action@v1.24.0
+#       with:
+#         payload: |
+#           {
+#             "text": "CI/CD Pipeline Status: ${{ job.status }}"
+#           }
+#       env:
+#         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
