@@ -1,4 +1,4 @@
-module github.com/AdekunleDally/voting-app
+module github.com/AdekunleDally/voting-app/code
 
 go 1.20
 
