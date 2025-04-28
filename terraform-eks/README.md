@@ -19,7 +19,7 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 ### Connect Terraform with AWS
 
-Its very easy to connect Terraform with AWS. Run `aws configure` command and provide the AWS Security credentials as shown in the video.
+Its very easy to connect  terraform with AWS. Run `aws configure` command and provide the AWS Security credentials as shown in the video.
 
 ### Configuration
 
