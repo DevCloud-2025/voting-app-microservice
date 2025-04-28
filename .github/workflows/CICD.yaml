@@ -13,29 +13,19 @@ permissions:
   contents: read
 
 jobs:
-  # code-quality-checks:
-  #   runs-on: ubuntu-latest
+  code-quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v3
 
-  #     - name: Setup Go
-  #       uses: actions/setup-go@v5
-  #       with:
-  #         go-version: 1.21
-
-  #     - name: Install golangci-lint
-  #       run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-
-  #     - name: Run golangci-lint
-  #       run: golangci-lint run --timeout=5m
-
-  #     - name: Install dependencies
-  #       run: go mod tidy
-
-  #     - name: Run tests
-  #       run: go test ./... -v
+      - name: Run Golint
+        uses: norwd/golintr@v2
+        with:
+          path: ./src/...
 
     security-scan:
       runs-on: ubuntu-latest
