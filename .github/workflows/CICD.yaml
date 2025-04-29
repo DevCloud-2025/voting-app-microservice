@@ -27,6 +27,45 @@ jobs:
         with:
           path: ./src/...
 
+      - name: Install gocover-cobertura
+        run: |
+            go get github.com/boumenot/gocover-cobertura && go install github.com/boumenot/gocover-cobertura
+      # Install gotestfmt on the VM running the action.
+      - name: Set up gotestfmt
+        uses: GoTestTools/gotestfmt-action@v2
+        with:
+          # Optional: pass the gotestfmt version you want to run. 
+          version: v2.0.0
+          # Optional: pass an organization name and repo to use a fork
+          org: GoTestTools
+          repo: gotestfmt
+          
+      - name: Run tests
+        run: sudo go test -race -json -v -coverprofile=coverage.txt ./... 2>&1 | tee /tmp/gotest.log | gotestfmt
+      
+      - name: Convert go coverage to corbetura format
+        run: gocover-cobertura < coverage.txt > coverage.xml
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: ./coverage.xml
+        
+      - name: Generate code coverage report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage.xml
+          badge: false
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '60 80'
+
   security-scan:
     runs-on: ubuntu-latest
     needs: code-quality-checks
@@ -41,6 +80,67 @@ jobs:
           scan-ref: '.'
           ignore-unfixed: true
           # trivy-config: trivy.yaml
+
+  paths-filter:
+    runs-on: ubuntu-latest
+    need: security-scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            voting-service:
+              - 'voting-service/**'
+            worker-service:
+              - 'worker-service/**'
+            result-service:
+              - 'result-service/**'
+  Build_and_Push_Docker_Images:
+    runs-on: ubuntu-latest
+    needs: paths-filter
+    strategy:
+      matrix:
+        # service: [service-a, service-b, service-c]
+        include:
+          - service: voting-service
+            dir: ./voting-service
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/voting-service
+          - service: worker-service
+            dir: ./worker-service
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/worker-service
+          - service: result-service
+            dir: ./result-service
+            image: ${{ secrets.DOCKERHUB_USERNAME }}/result-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: set Short SHA
+        run: |
+          echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+          
+      - name: Docker login
+        run: |
+          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          
+      - name: Build Docker image
+        if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
+        run: |
+          docker build -t ${{ matrix.image }}:${{env.SHORT_SHA}} ${{ matrix.dir }}
+
+
+      - name: Docker push
+        if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
+        run: |
+          docker push ${{ matrix.image }}:${{env.SHORT_SHA}}
+
+
+
 # name: CI/CD Pipeline
 
 # on:
