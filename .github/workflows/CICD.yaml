@@ -99,138 +99,65 @@ jobs:
               - 'worker-service/**'
             result-service:
               - 'result-service/**'
-  Build_and_Push_Docker_Images:
-    runs-on: ubuntu-latest
-    needs: paths-filter
-    strategy:
-      matrix:
-        # service: [service-a, service-b, service-c]
-        include:
-          - service: voting-service
-            dir: ./voting-service
-            image: ${{ secrets.DOCKERHUB_USERNAME }}/voting-service
-          - service: worker-service
-            dir: ./worker-service
-            image: ${{ secrets.DOCKERHUB_USERNAME }}/worker-service
-          - service: result-service
-            dir: ./result-service
-            image: ${{ secrets.DOCKERHUB_USERNAME }}/result-service
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: set Short SHA
-        run: |
-          echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-          
-      - name: Docker login
-        run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-
-      - name: Build Docker image
-        if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
-        run: |
-          docker build -t ${{ matrix.image }}:${{env.SHORT_SHA}} ${{ matrix.dir }}
-
-
-      - name: Docker push
-        if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
-        run: |
-          docker push ${{ matrix.image }}:${{env.SHORT_SHA}}
-
-
-
-# name: CI/CD Pipeline
-
-# on:
-#   push:
-#     branches:
-#       - main
-  
-
-# permissions:
-#   id-token: write
-#   contents: read
-
-# env:
-#   REGISTRY: docker.io
-#   IMAGE_NAMESPACE: yourdockerhubusername   # or your ECR namespace
-#   TF_WORKING_DIR: ./infra/terraform
-#   KUBE_MANIFEST_DIR: ./k8s-manifests
-
-# jobs:
-  # code-quality:
+  # Build_and_Push_Docker_Images:
   #   runs-on: ubuntu-latest
+  #   needs: paths-filter
+  #   strategy:
+  #     matrix:
+  #       # service: [service-a, service-b, service-c]
+  #       include:
+  #         - service: voting-service
+  #           dir: ./voting-service
+  #           image: ${{ secrets.DOCKERHUB_USERNAME }}/voting-service
+  #         - service: worker-service
+  #           dir: ./worker-service
+  #           image: ${{ secrets.DOCKERHUB_USERNAME }}/worker-service
+  #         - service: result-service
+  #           dir: ./result-service
+  #           image: ${{ secrets.DOCKERHUB_USERNAME }}/result-service
+
   #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-  #   - name: Set up Go
-  #     uses: actions/setup-go@v5
-  #     with:
-  #       go-version: '1.22'  # or your project's Go version
+  #     - name: set Short SHA
+  #       run: |
+  #         echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+          
+  #     - name: Docker login
+  #       run: |
+  #         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
-  #   - name: Install golangci-lint
-  #     run: |
-  #       curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.56.0
+  #     - name: Build Docker image
+  #       if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
+  #       run: |
+  #         docker build -t ${{ matrix.image }}:${{env.SHORT_SHA}} ${{ matrix.dir }}
 
-  #   - name: Run Linter
-  #     run: golangci-lint run ./...
 
-  #   - name: Run Unit Tests
-  #     run: go test ./... -v
+  #     - name: Docker push
+  #       if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
+  #       run: |
+  #         docker push ${{ matrix.image }}:${{env.SHORT_SHA}}
 
-  # security-scan:
-    # needs: code-quality
-    # runs-on: ubuntu-latest
-    # steps:
-    #   - uses: actions/checkout@v4
 
-    #   - name: Install Trivy
-    #     uses: aquasecurity/trivy-action@v0.16.1
-    #     with:
-    #       scan-type: fs
-    #       severity: CRITICAL,HIGH
 
-#   build-and-push:
-#     needs: security-scan
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         service:
-#           - voting-service
-#           - result-service
-#           - worker-service
 
-#     steps:
-#       - uses: actions/checkout@v4
 
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v3
 
-#       - name: Login to DockerHub
-#         uses: docker/login-action@v3
-#         with:
-#           username: ${{ secrets.DOCKER_USERNAME }}
-#           password: ${{ secrets.DOCKER_PASSWORD }}
 
-#       - name: Check if service changed
-#         id: changes
-#         uses: dorny/paths-filter@v3
-#         with:
-#           filters: |
-#             service:
-#               - '${{ matrix.service }}/**'
 
-#       - name: Build and push Docker image
-#         if: steps.changes.outputs.service == 'true'
-#         uses: docker/build-push-action@v5
-#         with:
-#           context: ./${{ matrix.service }}
-#           file: ./${{ matrix.service }}/Dockerfile
-#           push: true
-#           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ matrix.service }}:latest
+
+
+
+
+
+
+
+
+
+
+
+
 
 # aws-auth:
 #   runs-on: ubuntu-latest
