@@ -83,7 +83,7 @@ jobs:
 
   paths-filter:
     runs-on: ubuntu-latest
-    need: security-scan
+    needs: security-scan
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
       - name: Docker login
         run: |
           echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-          
+
       - name: Build Docker image
         if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
         run: |
