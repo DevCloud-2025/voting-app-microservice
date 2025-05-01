@@ -9,8 +9,8 @@ on:
       - main
 
 env:
-  GKE_WORKING_DIR: ./terraform-gke  # update this path to your actual Terraform directory
-  EKS_WORKING_DIR: ./terraform-eks/infrastructures # update this path to your actual Terraform directory
+  GKE_TF_WORKING_DIR: ./terraform-gke  # update this path to your actual Terraform directory
+  EKS_TF_WORKING_DIR: ./terraform-eks/infrastructures # update this path to your actual Terraform directory
 
 permissions:
   id-token: write
