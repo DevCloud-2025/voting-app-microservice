@@ -134,10 +134,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials for China region audience
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
         with:
-          audience: sts.amazonaws.com.cn
           aws-region: us-west-1
           role-to-assume: arn:aws:iam::057260092328:role/cicd_role
 
