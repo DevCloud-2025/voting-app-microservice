@@ -235,36 +235,36 @@ jobs:
 # #         service_account: <SERVICE_ACCOUNT_EMAIL>
 
   
-  terraform-apply:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # terraform-apply:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
+  #     - name: Terraform Init
+  #       working-directory: ${{ env.TF_WORKING_DIR }}
+  #       run: terraform init
 
-      - name: Terraform Apply
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve
+  #     - name: Terraform Apply
+  #       working-directory: ${{ env.TF_WORKING_DIR }}
+  #       run: terraform apply -auto-approve
 
-  deploy-to-kubernetes:
-    needs: terraform-apply
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # deploy-to-kubernetes:
+  #   needs: terraform-apply
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: v1.29.0
+  #     - name: Set up kubectl
+  #       uses: azure/setup-kubectl@v3
+  #       with:
+  #         version: v1.29.0
 
-      - name: Deploy Manifests
-        run: kubectl apply -f ${{ env.KUBE_MANIFEST_DIR }}
+  #     - name: Deploy Manifests
+  #       run: kubectl apply -f ${{ env.KUBE_MANIFEST_DIR }}
 
 #   post-deployment-tests:
 #     needs: deploy-to-kubernetes
