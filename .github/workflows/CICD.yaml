@@ -140,34 +140,38 @@ jobs:
           aws-region: us-west-1
           role-to-assume: arn:aws:iam::057260092328:role/cicd_role
 
+      - name: Debug AWS identity
+        run: aws sts get-caller-identity
 
-  EKS-Terraform-apply:
-    runs-on: ubuntu-latest
-    needs: aws-auth
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-      
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
-      - uses: actions/checkout@v4
 
-      - name: Terraform Init
-        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
-        run: terraform init
-      
-      - name: Terraform Plan
-        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
-        run: terraform plan -input=false
 
-      - name: Terraform Apply
-        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
-        run: terraform apply -auto-approve -input=false
+  # EKS-Terraform-apply:
+  #   runs-on: ubuntu-latest
+  #   needs: aws-auth
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+      
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+      
+  #     - name: Terraform fmt
+  #       id: fmt
+  #       run: terraform fmt -check
+  #       continue-on-error: true
+  #     - uses: actions/checkout@v4
+
+  #     - name: Terraform Init
+  #       working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+  #       run: terraform init
+      
+  #     - name: Terraform Plan
+  #       working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+  #       run: terraform plan -input=false
+
+  #     - name: Terraform Apply
+  #       working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+  #       run: terraform apply -auto-approve -input=false
       
 
   # GKE-Terraform-apply:
