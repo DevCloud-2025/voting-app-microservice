@@ -162,7 +162,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ env.EKS_TF_WORKING_DIR }}
-        run: terraform apply -auto-approve -input=false
+        run: terraform destroy -auto-approve -input=false
       
 
   # GKE-Terraform-apply:
