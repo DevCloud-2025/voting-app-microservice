@@ -8,75 +8,83 @@ on:
     branches:
       - main
 
+env:
+  GKE_WORKING_DIR: ./terraform-gke  # update this path to your actual Terraform directory
+  EKS_WORKING_DIR: ./terraform-eks/infrastructures # update this path to your actual Terraform directory
+
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  code-quality-checks:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  # code-quality-checks:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Setup Go
-        uses: actions/setup-go@v3
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v3
 
-      - name: Run Golint
-        uses: norwd/golintr@v2
-        with:
-          path: ./src/...
+  #     - name: Run Golint
+  #       uses: norwd/golintr@v2
+  #       with:
+  #         path: ./src/...
 
-      - name: Install gocover-cobertura
-        run: |
-            go get github.com/boumenot/gocover-cobertura && go install github.com/boumenot/gocover-cobertura
-      # Install gotestfmt on the VM running the action.
-      - name: Set up gotestfmt
-        uses: GoTestTools/gotestfmt-action@v2
-        with:
-          # Optional: pass the gotestfmt version you want to run. 
-          version: v2.0.0
-          # Optional: pass an organization name and repo to use a fork
-          org: GoTestTools
-          repo: gotestfmt
+  #     - name: Install gocover-cobertura
+  #       run: |
+  #           go get github.com/boumenot/gocover-cobertura && go install github.com/boumenot/gocover-cobertura
+  #     # Install gotestfmt on the VM running the action.
+  #     - name: Set up gotestfmt
+  #       uses: GoTestTools/gotestfmt-action@v2
+  #       with:
+  #         # Optional: pass the gotestfmt version you want to run. 
+  #         version: v2.0.0
+  #         # Optional: pass an organization name and repo to use a fork
+  #         org: GoTestTools
+  #         repo: gotestfmt
           
-      - name: Run tests
-        run: sudo go test -race -json -v -coverprofile=coverage.txt ./... 2>&1 | tee /tmp/gotest.log | gotestfmt
+  #     - name: Run tests
+  #       run: sudo go test -race -json -v -coverprofile=coverage.txt ./... 2>&1 | tee /tmp/gotest.log | gotestfmt
 
-  security-scan:
-    runs-on: ubuntu-latest
-    needs: code-quality-checks
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # security-scan:
+  #   runs-on: ubuntu-latest
+  #   needs: code-quality-checks
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scanner in fs mode
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          ignore-unfixed: true
-          # trivy-config: trivy.yaml
+  #     - name: Run Trivy vulnerability scanner in fs mode
+  #       uses: aquasecurity/trivy-action@0.28.0
+  #       with:
+  #         scan-type: 'fs'
+  #         scan-ref: '.'
+  #         ignore-unfixed: true
+  #         # trivy-config: trivy.yaml
 
-  paths-filter:
-    runs-on: ubuntu-latest
-    needs: security-scan
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # paths-filter:
+  #   runs-on: ubuntu-latest
+  #   needs: security-scan
+  #   outputs:
+  #     voting-service: ${{ steps.filter.outputs.voting-service }}
+  #     worker-service: ${{ steps.filter.outputs.worker-service }}
+  #     result-service: ${{ steps.filter.outputs.result-service }}
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Filter changed paths
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            voting-service:
-              - 'voting-service/**'
-            worker-service:
-              - 'worker-service/**'
-            result-service:
-              - 'result-service/**'
-  # Build_and_Push_Docker_Images:
+  #     - name: Filter changed paths
+  #       id: filter
+  #       uses: dorny/paths-filter@v3
+  #       with:
+  #         filters: |
+  #           voting-service:
+  #             - 'voting-service/**'
+  #           worker-service:
+  #             - 'worker-service/**'
+  #           result-service:
+  #             - 'result-service/**'
+  # Build-and-Push-Docker-Images:
   #   runs-on: ubuntu-latest
   #   needs: paths-filter
   #   strategy:
@@ -86,44 +94,115 @@ jobs:
   #         - service: voting-service
   #           dir: ./voting-service
   #           image: ${{ secrets.DOCKERHUB_USERNAME }}/voting-service
+  #           enabled: ${{ needs.paths-filter.outputs.voting-service }}
   #         - service: worker-service
   #           dir: ./worker-service
   #           image: ${{ secrets.DOCKERHUB_USERNAME }}/worker-service
+  #           enabled: ${{ needs.paths-filter.outputs.worker-service }}
   #         - service: result-service
   #           dir: ./result-service
   #           image: ${{ secrets.DOCKERHUB_USERNAME }}/result-service
+  #           enabled: ${{ needs.paths-filter.outputs.result-service }}
 
   #   steps:
   #     - name: Checkout code
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v4   
 
-  #     - name: set Short SHA
+  #     - name: set Short SHA  
   #       run: |
   #         echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
           
-  #     - name: Docker login
+  #     - name: Docker login 
   #       run: |
   #         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
   #     - name: Build Docker image
-  #       if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
+  #       if: matrix.enabled == 'true'
   #       run: |
   #         docker build -t ${{ matrix.image }}:${{env.SHORT_SHA}} ${{ matrix.dir }}
 
 
   #     - name: Docker push
-  #       if: ${{ needs.paths-filter.outputs[matrix.service] == 'true' }}
+  #       if: matrix.enabled == 'true'
   #       run: |
   #         docker push ${{ matrix.image }}:${{env.SHORT_SHA}}
 
+  aws-auth:
+    runs-on: ubuntu-latest
+    # needs: Build-and-Push-Docker-Images
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials for China region audience
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          audience: sts.amazonaws.com.cn
+          aws-region: us-west-1
+          role-to-assume: arn:aws:iam::057260092328:role/cicd_role
 
 
+  EKS-Terraform-apply:
+    runs-on: ubuntu-latest
+    needs: aws-auth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+      
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+      - uses: actions/checkout@v4
 
+      - name: Terraform Init
+        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+        run: terraform init
+      
+      - name: Terraform Plan
+        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+        run: terraform plan -input=false
 
+      - name: Terraform Apply
+        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+        run: terraform apply -auto-approve -input=false
+      
 
+  # GKE-Terraform-apply:
+  #   runs-on: ubuntu-latest
+  #   needs: EKS-Terraform-apply
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+      
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: 1.5.0
+      
+  #     - name: Terraform fmt
+  #       id: fmt
+  #       run: terraform fmt -check
+  #       continue-on-error: true
+  #     - uses: actions/checkout@v4
 
+  #     - name: Terraform Init
+  #       working-directory: ${{ env.GKE_TF_WORKING_DIR }}
+  #       run: terraform init
+      
+  #     - name: Terraform Plan
+  #       working-directory: ${{ env.GKE_TF_WORKING_DIR }}
+  #       run: terraform plan -input=false
 
-
+  #     - name: Terraform Apply
+  #       working-directory: ${{ env.GKE_TF_WORKING_DIR }}
+  #       run: terraform apply -auto-approve -input=false
+      
 
 
 
@@ -156,36 +235,36 @@ jobs:
 # #         service_account: <SERVICE_ACCOUNT_EMAIL>
 
   
-#   terraform-apply:
-#     needs: build-and-push
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
+  terraform-apply:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-#       - name: Setup Terraform
-#         uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-#       - name: Terraform Init
-#         working-directory: ${{ env.TF_WORKING_DIR }}
-#         run: terraform init
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
 
-#       - name: Terraform Apply
-#         working-directory: ${{ env.TF_WORKING_DIR }}
-#         run: terraform apply -auto-approve
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve
 
-#   deploy-to-kubernetes:
-#     needs: terraform-apply
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
+  deploy-to-kubernetes:
+    needs: terraform-apply
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-#       - name: Set up kubectl
-#         uses: azure/setup-kubectl@v3
-#         with:
-#           version: v1.29.0
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
 
-#       - name: Deploy Manifests
-#         run: kubectl apply -f ${{ env.KUBE_MANIFEST_DIR }}
+      - name: Deploy Manifests
+        run: kubectl apply -f ${{ env.KUBE_MANIFEST_DIR }}
 
 #   post-deployment-tests:
 #     needs: deploy-to-kubernetes
