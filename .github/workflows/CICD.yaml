@@ -145,33 +145,33 @@ jobs:
 
 
 
-  # EKS-Terraform-apply:
-  #   runs-on: ubuntu-latest
-  #   needs: aws-auth
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+  EKS-Terraform-apply:
+    runs-on: ubuntu-latest
+    needs: aws-auth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-  #     - name: Setup Terraform
-  #       uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
       
-  #     - name: Terraform fmt
-  #       id: fmt
-  #       run: terraform fmt -check
-  #       continue-on-error: true
-  #     - uses: actions/checkout@v4
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+      - uses: actions/checkout@v4
 
-  #     - name: Terraform Init
-  #       working-directory: ${{ env.EKS_TF_WORKING_DIR }}
-  #       run: terraform init
+      - name: Terraform Init
+        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+        run: terraform init
       
-  #     - name: Terraform Plan
-  #       working-directory: ${{ env.EKS_TF_WORKING_DIR }}
-  #       run: terraform plan -input=false
+      - name: Terraform Plan
+        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+        run: terraform plan -input=false
 
-  #     - name: Terraform Apply
-  #       working-directory: ${{ env.EKS_TF_WORKING_DIR }}
-  #       run: terraform apply -auto-approve -input=false
+      - name: Terraform Apply
+        working-directory: ${{ env.EKS_TF_WORKING_DIR }}
+        run: terraform apply -auto-approve -input=false
       
 
   # GKE-Terraform-apply:
