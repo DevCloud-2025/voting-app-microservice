@@ -21,6 +21,12 @@ spec:
             - containerPort: 8083
           env:
             - name: RESULTS_SERVICE_URL
-              value: "http://microservice.local/results"
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: RESULTS_SERVICE_URL             
             - name: REDIS_ADDR
-              value: "redis:6379"
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: REDIS_ADDR
