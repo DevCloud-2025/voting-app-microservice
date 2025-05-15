@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: results-service
+  labels:
+    app: results-app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8085
+      targetPort: 8085
+  selector:
+    app: results-app
+

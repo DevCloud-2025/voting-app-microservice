@@ -1,0 +1,9 @@
+backend:
+  enabled: true
+  image:
+    repository: your-backend-image
+    tag: latest
+  service:
+    type: ClusterIP
+  env:
+    DATABASE_URL: your-db-url

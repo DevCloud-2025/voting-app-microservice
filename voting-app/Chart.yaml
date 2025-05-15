@@ -1,0 +1,14 @@
+apiVersion: v2
+name: voting-app
+description: A Helm chart for Kubernetes
+version: 0.1.0
+dependencies:
+  - name: frontend
+    version: 0.1.0
+    condition: frontend.enabled
+    repository: "charts/frontend"
+    
+  - name: backend
+    version: 0.1.0
+    condition: backend.enabled
+    repository: "charts/backend"

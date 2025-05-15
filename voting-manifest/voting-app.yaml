@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voting-app
+  labels:
+    app: demo-voting-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-voting-app
+  template:
+    metadata:
+      labels:
+        app: demo-voting-app         
+    spec:
+      containers:
+        - name: voting-app
+          image: "lukmanadeokun31/voting-service:latest"
+          ports:
+            - containerPort: 8083
+          env:
+            - name: RESULTS_SERVICE_URL
+              value: "http://microservice.local/results"
+            - name: REDIS_ADDR
+              value: "redis:6379"
