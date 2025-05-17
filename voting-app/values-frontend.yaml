@@ -1,7 +1,0 @@
-frontend:
-  enabled: true
-  image:
-    repository: your-frontend-image
-    tag: latest
-  service:
-    type: LoadBalancer

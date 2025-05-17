@@ -1,0 +1,31 @@
+backend:
+  enabled: false
+
+frontend:
+  enabled: true
+  votingApp: 
+    spec:
+      replicas: 2
+    image:
+      name: voting-app
+      repository: lukmanadeokun31/voting-service
+      tag: latest
+      imagePullPolicy: IfNotPresent
+      ports:
+        containerPort: 8083
+
+    service:
+      type: ClusterIP
+      port: 8083
+      targetPort: 8083
+ 
+    serviceAccount:
+      create: true
+  
+config:
+  VOTING_SERVICE_URL: "http://microservice.local"
+  RESULTS_SERVICE_URL: "http://microservice.local/results"
+  REDIS_ADDR: "redis:6379"
+  POSTGRES_DB: "postgres"
+  POSTGRES_DB_NEW: "votingdb"
+  POSTGRES_HOST: "postgres"

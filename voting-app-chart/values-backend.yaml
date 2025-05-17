@@ -1,0 +1,85 @@
+frontend:
+  enabled: false
+
+backend:
+  enabled: true
+  resultsApp: 
+    spec:
+      replicas: 2
+    image:
+      name: results-app
+      repository: malik0x/result-app
+      tag: 2.1
+      imagePullPolicy: IfNotPresent
+      ports:
+        containerPort: 8085
+
+    service:
+      type: ClusterIP
+      port: 8085
+      targetPort: 8085
+  
+    serviceAccount:
+      create: false
+
+  workerApp: 
+    spec:
+      replicas: 1
+    image:
+      name: worker-app
+      repository: lukmanadeokun31/worker-service
+      tag: latest
+      imagePullPolicy: IfNotPresent
+      ports:
+        containerPort: 8084
+
+    service:
+      type: ClusterIP
+      port: 8084
+      targetPort: 8084
+
+  redis: 
+    spec:
+      replicas: 1
+    image:
+      name: redis
+      repository: redis
+      tag: latest
+      imagePullPolicy: IfNotPresent
+      ports:
+        containerPort: 6379
+
+    service:
+      type: ClusterIP
+      port: 6379
+      targetPort: 6379
+  
+  postgres: 
+    spec:
+      replicas: 1
+    image:
+      name: postgres
+      repository: postgres
+      tag: latest
+      imagePullPolicy: IfNotPresent
+      ports:
+        containerPort: 5432
+
+    service:
+      type: ClusterIP
+      port: 5432
+      targetPort: 5432
+  
+  secret:
+    data:
+      POSTGRES_USER: cG9zdGdyZXM=
+      POSTGRES_PASSWORD: T21vd3VubWkyOA==
+
+
+config:
+  VOTING_SERVICE_URL: "http://microservice.local"
+  RESULTS_SERVICE_URL: "http://microservice.local/results"
+  REDIS_ADDR: "redis:6379"
+  POSTGRES_DB: "postgres"
+  POSTGRES_DB_NEW: "votingdb"
+  POSTGRES_HOST: "postgres"

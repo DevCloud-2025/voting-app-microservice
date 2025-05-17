@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name}}-ingress
+  annotations:
+    #nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.paths.votingPath }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-service
+                port:
+                  number: {{ .Values.frontend.votingApp.service.port }}
+          - path: {{ .Values.ingress.paths.resultsPath }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-results-service
+                port:
+                  number: {{ .Values.backend.resultsApp.service.port }}

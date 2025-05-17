@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  {{- with .Values.config }}
+  VOTING_SERVICE_URL: {{ .VOTING_SERVICE_URL | quote }}
+  RESULTS_SERVICE_URL: {{ .RESULTS_SERVICE_URL | quote }}
+  REDIS_ADDR: {{ .REDIS_ADDR | quote }}
+  POSTGRES_DB: {{ .POSTGRES_DB | quote }}
+  POSTGRES_DB_NEW: {{ .POSTGRES_DB_NEW | quote }}
+  POSTGRES_HOST: {{ .POSTGRES_HOST | quote }}
+  {{- end }}
+

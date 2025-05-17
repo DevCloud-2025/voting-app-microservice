@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker-app
+  labels:
+    {{- include "demo-worker-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.workerApp.spec.replicas }}
+  selector:
+    matchLabels:
+      {{- include "demo-worker-app.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "demo-worker-app.labels" . | nindent 8 }}
+    spec:
+      containers:
+       {{- with .Values.backend.workerApp.image }}
+        - name: {{ .name }}
+          image: "{{ .repository }}:{{ .tag }}"
+          imagePullPolicy: {{ .imagePullPolicy }}
+          ports:
+            - containerPort: {{ .ports.containerPort }}
+        {{- end }}
+          env:
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_DB_NEW
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: POSTGRES_DB_NEW
+            - name: REDIS_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: REDIS_ADDR 
+    

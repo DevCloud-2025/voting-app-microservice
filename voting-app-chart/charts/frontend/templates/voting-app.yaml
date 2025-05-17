@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "demo-voting-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.votingApp.spec.replicas }}
+  selector:
+    matchLabels:
+      {{- include "demo-voting-app.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "demo-voting-app.labels" . | nindent 8 }}         
+    spec:
+      containers:
+       {{- with .Values.frontend.votingApp.image }}
+        - name: {{ .name }}
+          image: "{{ .repository }}:{{ .tag }}"
+          imagePullPolicy: {{ .imagePullPolicy }}
+          ports:
+            - containerPort: {{ .ports.containerPort }}
+        {{- end }}
+          env:
+            - name: RESULTS_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: RESULTS_SERVICE_URL             
+            - name: REDIS_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-config
+                  key: REDIS_ADDR
+        

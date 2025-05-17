@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-worker-service
+spec:
+  {{- with .Values.backend.workerApp.service }}
+  type: {{ .type }}
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+  {{- end }}
+  selector:
+    {{- include "demo-worker-app.labels" . | nindent 4 }}

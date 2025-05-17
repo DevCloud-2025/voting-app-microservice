@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.redis.spec.replicas }}
+  selector:
+    matchLabels:
+      {{- include "redis.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "redis.labels" . | nindent 8 }}
+    spec:
+      containers:
+       {{- with .Values.backend.redis.image }}
+        - name: {{ .name }}
+          image: "{{ .repository }}:{{ .tag }}"
+          imagePullPolicy: {{ .imagePullPolicy }}
+          ports:
+            - containerPort: {{ .ports.containerPort }}
+       {{- end }}
